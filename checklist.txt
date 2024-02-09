@@ -1,6 +1,6 @@
 Check list before running a script:
     1 - 'rm -r /home/gav061/.cache/wandb/'
-    2 - Remove comment on import wandb in Trainers.py
+    2 - Remove comment on import wandb for trainers in Martinez and Diana
     3 - Add comment to the pipeline debugger lines
     4 - Check WandB website if everything is well setup
     5 - Delete folder logs

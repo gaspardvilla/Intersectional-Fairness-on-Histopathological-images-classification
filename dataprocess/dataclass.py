@@ -21,6 +21,7 @@ class Data():
         self.split_regarding_subgroups = kwargs['split_regarding_subgroups']
         self.nb_features = self.data[0].shape[-1]
         self.nb_subgroups = len(np.unique(self.references[self.protected_attribbutes].values, axis = 0))
+        self.nb_workers = 16
         
         # Split the data set
         self._split()
@@ -83,8 +84,8 @@ class Data():
 
             # Loaders
             self.TrainLoader = DataLoader(self.TrainSet, batch_size = len(self.TrainSet), shuffle = True, drop_last = False)
-            self.ValidationLoader = DataLoader(self.ValidationSet, batch_size = 1, shuffle = False, drop_last = False, num_workers = 31)
-            self.TestLoader = DataLoader(self.TestSet, batch_size = 1, shuffle = False, drop_last = False, num_workers = 31)
+            self.ValidationLoader = DataLoader(self.ValidationSet, batch_size = 1, shuffle = False, drop_last = False, num_workers = self.nb_workers)
+            self.TestLoader = DataLoader(self.TestSet, batch_size = 1, shuffle = False, drop_last = False, num_workers = self.nb_workers)
         
         else:
             # Create the data classes
@@ -97,7 +98,7 @@ class Data():
 
             # Loaders
             self.TrainLoader = DataLoader(self.TrainSet, batch_size = len(self.TrainSet), shuffle = True, drop_last = False)
-            self.TestLoader = DataLoader(self.TestSet, batch_size = 1, shuffle = False, drop_last = False, num_workers = 31)
+            self.TestLoader = DataLoader(self.TestSet, batch_size = 1, shuffle = False, drop_last = False, num_workers = self.nb_workers)
 
     def _split_random(self, n_test):
         # Extract the subjects list

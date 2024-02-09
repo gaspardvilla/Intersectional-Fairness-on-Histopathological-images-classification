@@ -1,5 +1,7 @@
-from models.Trainers import TrainerPL, TrainerMartinez, TrainerDiana
 from pytorch_lightning.loggers import WandbLogger
+from trainers.TrainerMartinez import TrainerMartinez
+from trainers.TrainerDiana import TrainerDiana
+from trainers.TrainerPL import TrainerPL
 from dataprocess.dataclass import Data
 from models.Baseline import Baseline
 from models.Martinez import Martinez

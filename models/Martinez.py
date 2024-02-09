@@ -19,13 +19,6 @@ class Martinez(Baseline):
         self.ckpt_path = None
         
         
-    def update_ckpt_path(self, ckpt_path : str) -> None:
-        if self.ckpt_path is None:
-            split_path = ckpt_path.split('/')
-            split_path.insert(len(split_path) - 1, 'prov')
-            self.ckpt_path = '/'.join(split_path)
-        
-        
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr = self.lr)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
@@ -49,12 +42,6 @@ class Martinez(Baseline):
         
         # Check if there an improvement and do the training step
         self._check_for_improvement()
-            
-    
-    def _check_for_improvement(self) -> None:
-        if torch.max(self.risk_tensor) < torch.max(self.best_risk): 
-            self.best_risk = torch.max(self.risk_tensor).clone()
-            self._save()
         
         
     def _compute_loss(self, preds : torch.Tensor, targets : torch.Tensor, atts : torch.Tensor, task : str):
@@ -84,12 +71,23 @@ class Martinez(Baseline):
             # Update the risk vector
             risk_tensor[idx] = self.loss_fct(preds[cond_sg], targets[cond_sg])
             
-        # Compute the weighted mean loss of the predictions
+        # Compute the weighted mean loss of the predictions and return the loss
         self.risk_tensor = risk_tensor * self.weights
         loss = torch.sum(self.loss_fct_elementwise(preds, targets) * indicator)
-        
-        # Return the loss
         return loss
+        
+        
+    def update_ckpt_path(self, ckpt_path : str) -> None:
+        if self.ckpt_path is None:
+            split_path = ckpt_path.split('/')
+            split_path.insert(len(split_path) - 1, 'prov')
+            self.ckpt_path = '/'.join(split_path)
+            
+    
+    def _check_for_improvement(self) -> None:
+        if torch.max(self.risk_tensor) < torch.max(self.best_risk): 
+            self.best_risk = self.risk_tensor.clone()
+            self._save()
     
     
     def load_best_train(self):
@@ -102,7 +100,7 @@ class Martinez(Baseline):
     
         
     def update_weights(self, weights : torch.Tensor) -> None:
-        self.weights = torch.clone(weights)
+        self.weights = weights.clone()
     
         
     def name(self) -> str:
