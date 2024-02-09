@@ -19,11 +19,17 @@ lib64/
 parts/
 sdist/
 var/
+logs/
+data/
+results/
 wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.pkl
+*.ckpt
+.vscode/
 MANIFEST
 
 # PyInstaller
