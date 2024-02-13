@@ -51,8 +51,8 @@ class TrainerMartinez():
                 self.trainer.model.load_best_train()
                 self.trainer.save_checkpoint(ckpt_path)
                 
-                # Log the metrics
-                self._log(current_risk, best_risk, K)
+            # Log the metrics
+            self._log(current_risk, best_risk, K)
             
             # Loop update
             K += 1
@@ -90,8 +90,14 @@ class TrainerMartinez():
             
     def _log(self, current_risk : torch.Tensor, 
              best_risk : torch.Tensor, 
-             K : int) -> None:
-        wandb.log({'K_step' : K,
-                   'current_risk' : torch.max(current_risk),
-                   'best_risk' : torch.max(best_risk),
-                   'risk_loss' : current_risk.sum()})
+             K : int) -> None:    
+        print(f'--------------- MARTINEZ STEP : {K} ---------------')
+        print(f'alpha = {self.alpha}')
+        print(f'current risk = {torch.max(current_risk)}')
+        print(f'best risk = {torch.max(best_risk)}')
+        print(f'risk loss = {current_risk.sum()}')
+        if self.logger is not None:
+            wandb.log({'K_step' : K,
+                       'current_risk' : torch.max(current_risk),
+                       'best_risk' : torch.max(best_risk),
+                       'risk_loss' : current_risk.sum()})

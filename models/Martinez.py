@@ -72,7 +72,7 @@ class Martinez(Baseline):
             risk_tensor[idx] = self.loss_fct(preds[cond_sg], targets[cond_sg])
             
         # Compute the weighted mean loss of the predictions and return the loss
-        self.risk_tensor = risk_tensor * self.weights
+        self.risk_tensor = risk_tensor# * self.weights
         loss = torch.sum(self.loss_fct_elementwise(preds, targets) * indicator)
         return loss
         
