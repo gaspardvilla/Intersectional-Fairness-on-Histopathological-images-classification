@@ -5,7 +5,7 @@
 #SBATCH --mem=32G                          # Memory total in MiB (for all cores)
 #SBATCH -o ./logs/terminal/fairness_%j.log
 #SBATCH -e ./logs/terminal/fairness_%j.log
-#SBATCH --array=0-4
+#SBATCH --array=0-17
 
 # Activation of the env and get the cancer_id
 source activate pdm
@@ -24,6 +24,6 @@ python pipeline.py  --allow_wandb 1 \
                     \
                     --nb_epochs 500 \
                     --split_regarding_subgroups 1 \
-                    --NB_STEPS 100 \
+                    --NB_STEPS 50 \
                     \
                     --save_preds 1

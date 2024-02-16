@@ -42,7 +42,7 @@ else:
                                         'kirp', 'luad', 'lusc', 'read']}
 lambdas = [0.001, 0.005, 0.01, 0.05, 0.1]
 pt_methods = ['DF_pos', 'DF_sum', 'DF_max']
-alphas = [0.3, 0.4, 0.5, 0.6, 0.7]
+alphas = [0.5]
 
 # All the combinations for the run of the Foulds method
 COMBS_FOULDS = []
