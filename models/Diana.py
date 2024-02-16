@@ -42,7 +42,7 @@ class Diana(Baseline):
             avg_loss_subgroups[idx] = self.loss_fct(preds[cond_sg], targets[cond_sg])
             
         # Compute the weighted mean loss of the predictions
-        self.avg_loss_subgroups = avg_loss_subgroups * self.weights
+        self.avg_loss_subgroups = avg_loss_subgroups.clone()# * self.weights
         loss = torch.sum(self.loss_fct_elementwise(preds, targets) * indicator)
         
         # Return the loss
@@ -50,7 +50,7 @@ class Diana(Baseline):
     
     
     def get_avg_loss_subgroups(self):
-        return self.avg_loss_subgroups
+        return self.avg_loss_subgroups.clone()
     
     
     # def load_pretrained(self, ckpt_path : str):

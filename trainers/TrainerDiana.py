@@ -27,47 +27,33 @@ class TrainerDiana():
                   ckpt_path : str = None) -> None:
         # Initialization
         K = 1
-        best_risk = torch.Tensor([float('inf')])
         self.weights = torch.ones(self.nb_subgroups) / self.nb_subgroups
         
         # Loop until reaching the maximum number of steps
         while K <= self.nb_STEPS:
             
-            # Train the model
+            # Train the model and save the ckpts
             self._init_subtrainer(K)
             model.update_weights(self.weights)
-            model.update_ckpt_path(ckpt_path)
             self.trainer.train_fit(model, TrainLoader, ValidationLoader)
+            self.trainer.save_checkpoint(ckpt_path)
             
-            # Check for improvement
-            current_risk = model.best_risk
-            self._update_weights(current_risk, best_risk, K)
-            if torch.max(current_risk) < torch.max(best_risk):
-                
-                # Update the best risk and save the chechpoints
-                best_risk = current_risk.clone()
-                self.trainer.model.load_best_train()
-                self.trainer.save_checkpoint(ckpt_path)
-                
-                # Log the metrics
-                self._log(current_risk, best_risk, K)
+            # Update the weights and log the metrics
+            current_error = self.trainer.model.get_avg_loss_subgroups()
+            self._update_weights(current_error, K)
+            self._log(current_error, K)
             
             # Loop update
             K += 1
             model = reset_model(model)
             
             
-    def _update_weights(self, current_risk : torch.Tensor,
-                        best_risk : torch.Tensor,
+    def _update_weights(self, current_error : torch.Tensor,
                         K : int) -> None:
-        # Get index where risk is worse than the best one
-        ones = torch.zeros(self.nb_subgroups)
-        ones[current_risk >= best_risk] = 1
-        
-        # Update the weights 
-        self.weights = (self.alpha * self.weights) + (((1 - self.alpha) / K) * ones)
-        self.weights = self.weights / self.weights.sum()
-        
+        # Update the weights at each iteration
+        eta = 1 / torch.sqrt(torch.tensor(K))
+        self.weights = self.weights * torch.exp(eta * current_error)
+        self.weights = self.weights.detach()
     
     def test(self, model, TestLoader) -> None:
         self.trainer.test(model, TestLoader)
@@ -80,16 +66,16 @@ class TrainerDiana():
                                      logger = self.logger,
                                      sub_trainer = True)
         else:
-            self.trainer = TrainerPL(max_epochs = 100, 
+            self.trainer = TrainerPL(max_epochs = 200, 
                                      check_val_every_n_epoch = self.check_val_every_n_epochs, 
                                      logger = self.logger,
                                      sub_trainer = True)
             
             
-    def _log(self, current_risk : torch.Tensor, 
-             best_risk : torch.Tensor, 
+    def _log(self, current_error : torch.Tensor, 
              K : int) -> None:
-        wandb.log({'K_step' : K,
-                   'current_risk' : torch.max(current_risk),
-                   'best_risk' : torch.max(best_risk),
-                   'risk_loss' : current_risk.sum()})
+        print(f'--------------- DIANA STEP : {K} ---------------')
+        print(f'current error = {torch.max(current_error)}')
+        if self.logger is not None:
+            wandb.log({'K_step' : K,
+                       'current_error' : torch.max(current_error)})

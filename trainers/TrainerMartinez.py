@@ -90,7 +90,7 @@ class TrainerMartinez():
             
     def _log(self, current_risk : torch.Tensor, 
              best_risk : torch.Tensor, 
-             K : int) -> None:    
+             K : int) -> None:
         print(f'--------------- MARTINEZ STEP : {K} ---------------')
         print(f'alpha = {self.alpha}')
         print(f'current risk = {torch.max(current_risk)}')

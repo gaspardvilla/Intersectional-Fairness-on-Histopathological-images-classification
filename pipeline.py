@@ -10,12 +10,12 @@ args = get_args()
 
 # print('################################')
 # print('################################')
-# args.model = 'Martinez'
+# args.model = 'Diana'
 # args.allow_wandb = False
 # args.nb_epochs = 5
 # args.task = 'cancer_classification'
 # args.caner = 'luad_lusc_FS'
-# args.NB_STEPS = 1
+# args.NB_STEPS = 3
 # print('################################')
 # print('################################')
 

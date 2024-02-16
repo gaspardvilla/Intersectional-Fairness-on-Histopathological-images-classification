@@ -50,10 +50,11 @@ def init(**kwargs):
                                                                 nb_STEPS = kwargs['NB_STEPS'],
                                                                 alpha = kwargs['alpha_'])
     elif kwargs['model'] == 'Diana': trainer = TrainerDiana(max_epochs = kwargs['nb_epochs'],
-                                                            check_val_every_n_epoch = kwargs['check_val'],
-                                                            logger = wandb,
-                                                            train_protected_atts = list(enumerate(data.TrainLoader))[0][1][2],
-                                                            nb_STEPS = kwargs['NB_STEPS'])
+                                                              check_val_every_n_epoch = kwargs['check_val'],
+                                                              logger = wandb,
+                                                              nb_subgroups = data.nb_subgroups,
+                                                            #   train_protected_atts = list(enumerate(data.TrainLoader))[0][1][2],
+                                                              nb_STEPS = kwargs['NB_STEPS'])
     else: trainer = TrainerPL(max_epochs = kwargs['nb_epochs'],
                               check_val_every_n_epoch = kwargs['check_val'],
                               logger = wandb)
