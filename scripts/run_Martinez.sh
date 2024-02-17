@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -c 4                               # Request one core
-#SBATCH -t 52:00:00                        # Runtime in D-HH:MM format
-#SBATCH -p medium                    # Partition to run in
+#SBATCH -t 60:00:00                        # Runtime in D-HH:MM format
+#SBATCH -p medium                          # Partition to run in
 #SBATCH --mem=32G                          # Memory total in MiB (for all cores)
 #SBATCH -o ./logs/terminal/fairness_%j.log
 #SBATCH -e ./logs/terminal/fairness_%j.log
@@ -24,6 +24,6 @@ python pipeline.py  --allow_wandb 1 \
                     \
                     --nb_epochs 500 \
                     --split_regarding_subgroups 1 \
-                    --NB_STEPS 50 \
+                    --NB_STEPS 100 \
                     \
                     --save_preds 1

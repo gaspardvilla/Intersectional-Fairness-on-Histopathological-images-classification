@@ -82,7 +82,7 @@ class TrainerMartinez():
                                      logger = self.logger,
                                      sub_trainer = True)
         else:
-            self.trainer = TrainerPL(max_epochs = 200, 
+            self.trainer = TrainerPL(max_epochs = 400, 
                                      check_val_every_n_epoch = self.check_val_every_n_epochs, 
                                      logger = self.logger,
                                      sub_trainer = True)
