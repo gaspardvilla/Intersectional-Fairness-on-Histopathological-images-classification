@@ -25,15 +25,15 @@ class Diana(Baseline):
     
     def _compute_avg_loss_subgroups(self, preds : torch.Tensor, targets : torch.Tensor, atts : torch.Tensor):
         # Initialization
-        subgroups = torch.unique(atts, dim = 0)
+        self.subgroups = torch.unique(atts, dim = 0)
         indicator = torch.zeros(len(preds))
-        avg_loss_subgroups = torch.zeros(len(subgroups))
+        avg_loss_subgroups = torch.zeros(len(self.subgroups))
 
         # Loop on the subgroups
-        for idx in range(len(subgroups)):
+        for idx in range(len(self.subgroups)):
             
             # Get the indices of each element of the current subgroup
-            cond_sg = torch.all(atts == subgroups[idx], dim = 1)
+            cond_sg = torch.all(atts == self.subgroups[idx], dim = 1)
             
             # Change the indicator value for the loss
             indicator[cond_sg] = self.weights[idx] / len(targets[cond_sg])
@@ -47,18 +47,6 @@ class Diana(Baseline):
         
         # Return the loss
         return loss
-    
-    
-    def get_avg_loss_subgroups(self):
-        return self.avg_loss_subgroups.clone()
-    
-    
-    # def load_pretrained(self, ckpt_path : str):
-    #     # Check the checkpoints exist
-    #     if os.path.exists(ckpt_path):        
-    #         ckpts = torch.load(ckpt_path)
-    #         self.load_state_dict(ckpts['state_dict'])
-    #     else: print('--------- Random initialization used [NO CHECKPOINTS] ---------')
      
         
     def update_weights(self, weights : torch.Tensor) -> None:

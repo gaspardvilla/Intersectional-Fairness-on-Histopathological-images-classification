@@ -10,7 +10,7 @@ args = get_args()
 
 # print('################################')
 # print('################################')
-# args.model = 'Diana'
+# args.model = 'Martinez'
 # args.allow_wandb = False
 # args.nb_epochs = 5
 # args.task = 'cancer_classification'

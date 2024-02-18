@@ -42,17 +42,21 @@ class TrainerMartinez():
             self.trainer.train_fit(model, TrainLoader, ValidationLoader)
             
             # Check for improvement
-            current_risk = model.best_risk
-            self._update_weights(current_risk, best_risk, K)
+            current_risk = self.trainer.model.best_risk.clone()
             if torch.max(current_risk) < torch.max(best_risk):
+                
+                # Save the weights for the best model
+                self._save_weights(ckpt_path, self.trainer.model.subgroups)
                 
                 # Update the best risk and save the chechpoints
                 best_risk = current_risk.clone()
                 self.trainer.model.load_best_train()
                 self.trainer.save_checkpoint(ckpt_path)
                 
-            # Log the metrics
-            self._log(current_risk, best_risk, K)
+            # Log the metrics and update the weights
+            self._update_weights(current_risk, best_risk, K)
+            self._log(current_risk = current_risk, 
+                      best_risk = best_risk, K = K)
             
             # Loop update
             K += 1
@@ -69,22 +73,18 @@ class TrainerMartinez():
         # Update the weights 
         self.weights = (self.alpha * self.weights) + (((1 - self.alpha) / K) * ones)
         self.weights = self.weights / self.weights.sum()
-        
-    
-    def test(self, model, TestLoader) -> None:
-        self.trainer.test(model, TestLoader)
     
     
     def _init_subtrainer(self, K : int):
         if K == self.nb_STEPS:
             self.trainer = TrainerPL(max_epochs = self.max_epochs, 
-                                     check_val_every_n_epoch = self.check_val_every_n_epochs, 
+                                     check_val_every_n_epoch = self.max_epochs, 
                                      logger = self.logger,
                                      sub_trainer = True)
         else:
             self.trainer = TrainerPL(max_epochs = 400, 
-                                     check_val_every_n_epoch = self.check_val_every_n_epochs, 
-                                     logger = self.logger,
+                                     check_val_every_n_epoch = 400, 
+                                     logger = None,
                                      sub_trainer = True)
             
             
@@ -101,3 +101,19 @@ class TrainerMartinez():
                        'current_risk' : torch.max(current_risk),
                        'best_risk' : torch.max(best_risk),
                        'risk_loss' : current_risk.sum()})
+            
+            
+    def _save_weights(self, ckpt_path : str, subgroups : torch.Tensor) -> None:
+        split_path = ckpt_path.split('/')
+        
+        # Save weights
+        split_path[-1] = 'best_weights.pt'
+        torch.save(self.weights, '/'.join(split_path))
+    
+        # Save corresponding subgroups
+        split_path[-1] = 'subgroups.pt'
+        torch.save(subgroups, '/'.join(split_path))
+        
+    
+    def test(self, model, TestLoader) -> None:
+        self.trainer.test(model, TestLoader)

@@ -40,30 +40,31 @@ class Martinez(Baseline):
         metrics['train/risk'] = torch.max(self.risk_tensor)
         self.log_dict(metrics, on_step = False, on_epoch = True)
         
-        # Check if there an improvement and do the training step
+        # Check if there an improvement and return the loss
         self._check_for_improvement()
+        return metrics['train/loss']
         
         
     def _compute_loss(self, preds : torch.Tensor, targets : torch.Tensor, atts : torch.Tensor, task : str):
         # Compute the loss during training or not
-        if task == 'train': loss = self._compute_loss_risk_tensor(preds, targets, atts)
+        if task == 'train': loss = self._compute_loss_risk(preds, targets, atts)
         else: loss = self.loss_fct(preds, targets)
         
         # Return the loss
         return loss
     
     
-    def _compute_loss_risk_tensor(self, preds : torch.Tensor, targets : torch.Tensor, atts : torch.Tensor):
+    def _compute_loss_risk(self, preds : torch.Tensor, targets : torch.Tensor, atts : torch.Tensor):
         # Initialization
-        subgroups = torch.unique(atts, dim = 0)
+        self.subgroups = torch.unique(atts, dim = 0)
         indicator = torch.zeros(len(preds))
-        risk_tensor = torch.zeros(len(subgroups))
+        risk_tensor = torch.zeros(len(self.subgroups))
 
         # Loop on the subgroups
-        for idx in range(len(subgroups)):
+        for idx in range(len(self.subgroups)):
             
             # Get the indices of each element of the current subgroup
-            cond_sg = torch.all(atts == subgroups[idx], dim = 1)
+            cond_sg = torch.all(atts == self.subgroups[idx], dim = 1)
             
             # Change the indicator value for the loss
             indicator[cond_sg] = self.weights[idx] / len(targets[cond_sg])
@@ -91,21 +92,19 @@ class Martinez(Baseline):
     
     
     def load_best_train(self):
-        ckpts = torch.load(self.ckpt_path)
-        self.load_state_dict(ckpts['state_dict'])
-    
-    
-    def get_risk_tensor(self):
-        return self.risk_tensor
-    
+        if os.path.isfile(self.ckpt_path):
+            ckpts = torch.load(self.ckpt_path)
+            self.load_state_dict(ckpts['state_dict'])
+        else: print('No pre-trained model - sanity check step for validation?')
+        
         
     def update_weights(self, weights : torch.Tensor) -> None:
         self.weights = weights.clone()
-    
-        
-    def name(self) -> str:
-        return 'Martinez'
             
             
     def _save(self):
         self.trainer.save_checkpoint(self.ckpt_path)
+    
+        
+    def name(self) -> str:
+        return 'Martinez'
