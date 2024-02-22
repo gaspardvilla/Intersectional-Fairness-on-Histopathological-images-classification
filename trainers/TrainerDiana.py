@@ -41,13 +41,13 @@ class TrainerDiana():
             # Check for improvement
             current_error = self.trainer.model.avg_loss_subgroups.clone()
             if torch.max(current_error) < torch.max(best_error):
-                
-                # Save the weights for the best model
-                self._save_weights(ckpt_path, self.trainer.model.subgroups)
             
                 # Update the best error and save the ckpts
                 best_error = current_error.clone()
                 self.trainer.save_checkpoint(ckpt_path)
+                
+                # Save the weights for the best model
+                self._save_weights(ckpt_path, self.trainer.model.subgroups)
             
             # Log the metrics and update weights
             self._update_weights(current_error, K)
@@ -73,8 +73,8 @@ class TrainerDiana():
                                      logger = self.logger,
                                      sub_trainer = True)
         else:
-            self.trainer = TrainerPL(max_epochs = 400, 
-                                     check_val_every_n_epoch = 400, 
+            self.trainer = TrainerPL(max_epochs = 100, 
+                                     check_val_every_n_epoch = 100, 
                                      logger = None,
                                      sub_trainer = True)
             

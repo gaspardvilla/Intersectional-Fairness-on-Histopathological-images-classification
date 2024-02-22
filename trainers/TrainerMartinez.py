@@ -45,13 +45,13 @@ class TrainerMartinez():
             current_risk = self.trainer.model.best_risk.clone()
             if torch.max(current_risk) < torch.max(best_risk):
                 
-                # Save the weights for the best model
-                self._save_weights(ckpt_path, self.trainer.model.subgroups)
-                
                 # Update the best risk and save the chechpoints
                 best_risk = current_risk.clone()
                 self.trainer.model.load_best_train()
                 self.trainer.save_checkpoint(ckpt_path)
+                
+                # Save the weights for the best model
+                self._save_weights(ckpt_path, self.trainer.model.subgroups)
                 
             # Log the metrics and update the weights
             self._update_weights(current_risk, best_risk, K)
@@ -82,8 +82,8 @@ class TrainerMartinez():
                                      logger = self.logger,
                                      sub_trainer = True)
         else:
-            self.trainer = TrainerPL(max_epochs = 400, 
-                                     check_val_every_n_epoch = 400, 
+            self.trainer = TrainerPL(max_epochs = 100, 
+                                     check_val_every_n_epoch = 100, 
                                      logger = None,
                                      sub_trainer = True)
             
