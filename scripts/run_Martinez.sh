@@ -14,10 +14,10 @@ JOB_ID=$((SLURM_ARRAY_TASK_ID))
 # Main process
 python pipeline.py  --allow_wandb 1 \
                     --job_id ${JOB_ID} \
-                    --ID 2 \
+                    --ID 10 \
                     \
                     --custom_subgroups 0 \
-                    --add_protected_attributes 1 \
+                    --add_protected_attributes 0 \
                     \
                     --model Martinez \
                     --save_model 1 \
