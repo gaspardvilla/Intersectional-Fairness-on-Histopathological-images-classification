@@ -30,6 +30,9 @@ share/python-wheels/
 *.pkl
 *.ckpt
 .vscode/
+images/
+*.eps
+*.png
 MANIFEST
 
 # PyInstaller

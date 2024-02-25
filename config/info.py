@@ -1,7 +1,7 @@
 # All categories we have in the data set for genders and races
 GENDERS = {'str' : ['FEMALE', 'MALE'],
            'class' : [0, 1]}
-RACES = {'str' : ['AMERICAN INDIAN OR ALASKA NATIVE', 'WHITE', 'ASIAN', 'BLACK OR AFRICAN AMERICAN'],
+RACES = {'str' : ['AMERICAN INDIAN', 'WHITE', 'ASIAN', 'BLACK'],
          'class' : [0, 1, 2, 3]}
 AGES = {'str' : list(map(str, range(10))),
         'class' : list(range(10))}
