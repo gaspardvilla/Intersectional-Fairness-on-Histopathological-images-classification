@@ -24,9 +24,9 @@ class Data():
         self.nb_workers = 16
         
         # Split the data set
-        self._split()
+        self.split()
         
-    def _split(self):
+    def split(self):
         # Initialization
         n_test = int(len(self.references) * self.ratio)
         if self.split_regarding_subgroups: self._split_subgroups()

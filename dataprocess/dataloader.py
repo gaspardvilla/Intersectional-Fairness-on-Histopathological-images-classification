@@ -9,6 +9,7 @@ def load_data(**kwargs):
     # Initialization of the references
     file_path = f'data/{kwargs["task"]}/{kwargs["task"]}_{kwargs["cancer"]}.csv'
     references = pd.read_csv(file_path)
+    references = _rename_duplicate_subj(references)
     
     # Formating of the protected attributes
     references = _format_protected_attributes(references, 
@@ -71,4 +72,20 @@ def _format_protected_attributes(references : pd.DataFrame,
     
     # Return the references
     references.reset_index(drop = True, inplace = True)
+    return references
+
+
+def _rename_duplicate_subj(references : pd.DataFrame) -> pd.DataFrame:
+    # Get the subjects that have multiple occurences in the data set
+    subj_multi = references.subj.value_counts()[references.subj.value_counts() > 1].index.to_list()
+    
+    # Loop on these subjects
+    for subj in subj_multi:
+        
+        # Get the indices of these subject's data and change the subject id
+        indices = references[references.subj == subj].index
+        for i, idx in enumerate(indices):
+            references.loc[idx, 'subj'] = subj + f'_{i}'
+            
+    # Return the references 
     return references

@@ -5,10 +5,12 @@ import numpy as np
 import torch
 
 
-def compute_pareto_metrics(preds : pd.DataFrame, 
+def compute_pareto_metrics(pred : pd.DataFrame, 
                            loss_fct,
-                           protected_attributes : list) -> dict:
+                           protected_attributes : list,
+                           all_only : bool = False) -> dict:
     # Initialization
+    preds = pred.copy()
     pareto_fairness = {}
     N = len(preds)
     nb_subgroups_all = len(np.unique(preds[protected_attributes].values, axis = 0))
@@ -17,8 +19,11 @@ def compute_pareto_metrics(preds : pd.DataFrame,
     preds['label_raw'] = list(torch.cat([1 - torch.Tensor(preds.label.values).unsqueeze(0), torch.Tensor(preds.label.values).unsqueeze(0)], dim = 0).T)
     preds['loss'] = preds.apply(lambda row: loss_fct(torch.from_numpy(np.reshape(list(row['pred_raw']), (1, 2))), torch.from_numpy(np.reshape(list(row['label_raw']), (1, 2)))).item(), axis = 1)
 
+    if all_only : sets_to_evaluate = ['all_']
+    else: sets_to_evaluate = ['all_', 'train_', 'val_', 'test_', 'full_test_']
+
     # Loop on all possible set and get the paretor fairness scores for each
-    for set_ in ['all', 'train', 'val', 'test', 'full_test']:
+    for set_ in sets_to_evaluate:
         
         # Get the avg_loss_df for the current set 
         avg_loss_df, nb_preds = _get_average_loss_subgroups(preds, set_, protected_attributes)
@@ -32,7 +37,7 @@ def compute_pareto_metrics(preds : pd.DataFrame,
 
 def _get_average_loss_subgroups(preds : pd.DataFrame, 
                                 set_ : str,
-                                protected_attributes : list) -> [pd.DataFrame, int]:
+                                protected_attributes : list):
     # Filter the preds with the desired data set
     sub_preds = _select_preds(preds, set_)
     
@@ -62,11 +67,11 @@ def _get_average_loss_subgroups(preds : pd.DataFrame,
 def _select_preds(preds : pd.DataFrame,
                   set_ : str) -> pd.DataFrame:
     # Filter the preds with the desired data set
-    if set_ == 'all': sub_preds = preds.copy()
-    elif set_ == 'train': sub_preds = preds[preds.set == 'train']
-    elif set_ == 'val': sub_preds = preds[preds.set == 'val']
-    elif set_ == 'test': sub_preds = preds[preds.set == 'test']
-    elif set_ == 'full_test': sub_preds = preds[preds.set.isin(['val', 'test'])]
+    if set_ == 'all_': sub_preds = preds.copy()
+    elif set_ == 'train_': sub_preds = preds[preds.set == 'train']
+    elif set_ == 'val_': sub_preds = preds[preds.set == 'val']
+    elif set_ == 'test_': sub_preds = preds[preds.set == 'test']
+    elif set_ == 'full_test_': sub_preds = preds[preds.set.isin(['val', 'test'])]
     return sub_preds
 
 
@@ -76,19 +81,20 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
                             nb_preds : int,
                             nb_subgroups_all : int) -> dict:
     # Initialization
+    if set_ == 'all_': set_ = ''
     metrics_dict = {}
     
     # Sort avg_loss_df by loss (descending) and size (descending)
     avg_loss_df.sort_values(['avg_loss', 'size_'], ascending = [False, False], inplace = True, ignore_index = True)
     
     # Extract the metric 'pareto_classic' - Maximum Average Loss (taken on the largest subgroups if equality)
-    metrics_dict[f'{set_}_pareto_classic'] = avg_loss_df.iloc[0]['avg_loss']
+    metrics_dict[f'{set_}MMPF'] = avg_loss_df.iloc[0]['avg_loss']
     
     # Extract the metric 'pareto_minimum_size' - Maximum average loss on the subgroups of size at least larger than (1/nb_subgroups) * nb_preds
-    nb_all = max(min(int(N / nb_subgroups_all), avg_loss_df['size_'].max()), 1)
-    nb_set = max(min(int(nb_preds / len(avg_loss_df)), avg_loss_df['size_'].max()), 1)
-    metrics_dict[f'{set_}_pareto_minimum_size_all'] = avg_loss_df[avg_loss_df.size_ >= nb_all].iloc[0]['avg_loss']
-    metrics_dict[f'{set_}_pareto_minimum_size_set'] = avg_loss_df[avg_loss_df.size_ >= nb_set].iloc[0]['avg_loss']
+    nb_all = max(min(int(N / (2 * nb_subgroups_all)), avg_loss_df['size_'].max()), 1)
+    nb_set = max(min(int(nb_preds / (2 * len(avg_loss_df))), avg_loss_df['size_'].max()), 1)
+    metrics_dict[f'{set_}MMPF_size'] = avg_loss_df[avg_loss_df.size_ >= nb_all].iloc[0]['avg_loss']
+    metrics_dict[f'{set_}MMPF_size_set'] = avg_loss_df[avg_loss_df.size_ >= nb_set].iloc[0]['avg_loss']
 
     # Extract the metric 'pareto_5' / 'pareto_10' / 'pareto_adapted_all' / 'pareto_adapted_set'
     # Initialization of some parameters
@@ -139,10 +145,10 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
         idx += 1
 
     # Introduce the metric into the dictionnary
-    metrics_dict[f'{set_}_pareto_5'] = pareto_5 / current_nb_5
-    metrics_dict[f'{set_}_pareto_10'] = pareto_10 / current_nb_10
-    metrics_dict[f'{set_}_pareto_adapted_all'] = pareto_all / current_nb_all
-    metrics_dict[f'{set_}_pareto_adapted_set'] = pareto_set / current_nb_set
+    metrics_dict[f'{set_}MMPF_5'] = pareto_5 / current_nb_5
+    metrics_dict[f'{set_}MMPF_10'] = pareto_10 / current_nb_10
+    metrics_dict[f'{set_}MMPF_adapted'] = pareto_all / current_nb_all
+    metrics_dict[f'{set_}MMPF_adapted_set'] = pareto_set / current_nb_set
     
     # Return the dictionnary
     return metrics_dict
@@ -161,7 +167,7 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
 #     pareto_10 = 0
 #     current_n_5 = 0
 #     current_n_10 = 0
-#     discriminated_subgroups = {f'{set_}_5%': [], f'{set_}_10%' : []}
+#     discriminated_subgroups = {f'{set_}5%': [], f'{set_}10%' : []}
     
 #     # Create the dataframe that will contains all pareto fairness measures
 #     pareto_df = pd.DataFrame(data = torch.unique(torch.Tensor(sub_preds[protected_attributes].values), dim = 0),
@@ -191,10 +197,10 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
 #         if current_n_5 < n_5:
 #             pareto_5 += pareto_df.iloc[idx]['raw_score']
 #             current_n_5 += pareto_df.iloc[idx]['size']
-#             discriminated_subgroups[f'{set_}_5%'] += [list(pareto_df.iloc[idx][protected_attributes].values)]
+#             discriminated_subgroups[f'{set_}5%'] += [list(pareto_df.iloc[idx][protected_attributes].values)]
 #         pareto_10 += pareto_df.iloc[idx]['raw_score']
 #         current_n_10 += pareto_df.iloc[idx]['size']
-#         discriminated_subgroups[f'{set_}_10%'] += [list(pareto_df.iloc[idx][protected_attributes].values)]
+#         discriminated_subgroups[f'{set_}10%'] += [list(pareto_df.iloc[idx][protected_attributes].values)]
 #         idx += 1
 #     pareto_5 = pareto_5 /current_n_5
 #     pareto_10 = pareto_10 / current_n_10
