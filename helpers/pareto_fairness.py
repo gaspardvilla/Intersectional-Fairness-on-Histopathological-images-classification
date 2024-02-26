@@ -93,8 +93,12 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
     # Extract the metric 'pareto_minimum_size' - Maximum average loss on the subgroups of size at least larger than (1/nb_subgroups) * nb_preds
     nb_all = max(min(int(N / (2 * nb_subgroups_all)), avg_loss_df['size_'].max()), 1)
     nb_set = max(min(int(nb_preds / (2 * len(avg_loss_df))), avg_loss_df['size_'].max()), 1)
+    nb_all_2 = max(min(int(N / (nb_subgroups_all)), avg_loss_df['size_'].max()), 1)
+    nb_set_2 = max(min(int(nb_preds / (len(avg_loss_df))), avg_loss_df['size_'].max()), 1)
     metrics_dict[f'{set_}MMPF_size'] = avg_loss_df[avg_loss_df.size_ >= nb_all].iloc[0]['avg_loss']
     metrics_dict[f'{set_}MMPF_size_set'] = avg_loss_df[avg_loss_df.size_ >= nb_set].iloc[0]['avg_loss']
+    metrics_dict[f'{set_}MMPF_size_2'] = avg_loss_df[avg_loss_df.size_ >= nb_all_2].iloc[0]['avg_loss']
+    metrics_dict[f'{set_}MMPF_size_set_2'] = avg_loss_df[avg_loss_df.size_ >= nb_set_2].iloc[0]['avg_loss']
 
     # Extract the metric 'pareto_5' / 'pareto_10' / 'pareto_adapted_all' / 'pareto_adapted_set'
     # Initialization of some parameters
@@ -105,11 +109,15 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
     current_nb_10 = 0
     current_nb_all = 0
     current_nb_set = 0
+    current_nb_all_2 = 0
+    current_nb_set_2 = 0
 
     pareto_5 = 0
     pareto_10 = 0
     pareto_all = 0
     pareto_set = 0
+    pareto_all_2 = 0
+    pareto_set_2 = 0
 
     # Loop on the avg_loss_df (sorted)
     stop_cond = 0
@@ -140,6 +148,18 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
             pareto_set += avg_loss_df.iloc[idx]['avg_loss'] * avg_loss_df.iloc[idx]['size_']
             current_nb_set += avg_loss_df.iloc[idx]['size_']
             stop_cond = 0
+        
+        # 'pareto_all'
+        if current_nb_all_2 < nb_all_2:
+            pareto_all_2 += avg_loss_df.iloc[idx]['avg_loss'] * avg_loss_df.iloc[idx]['size_']
+            current_nb_all_2 += avg_loss_df.iloc[idx]['size_']
+            stop_cond = 0
+            
+        # 'pareto_set'
+        if current_nb_set_2 < nb_set_2:
+            pareto_set_2 += avg_loss_df.iloc[idx]['avg_loss'] * avg_loss_df.iloc[idx]['size_']
+            current_nb_set_2 += avg_loss_df.iloc[idx]['size_']
+            stop_cond = 0
             
         # Update the idx
         idx += 1
@@ -149,6 +169,8 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
     metrics_dict[f'{set_}MMPF_10'] = pareto_10 / current_nb_10
     metrics_dict[f'{set_}MMPF_adapted'] = pareto_all / current_nb_all
     metrics_dict[f'{set_}MMPF_adapted_set'] = pareto_set / current_nb_set
+    metrics_dict[f'{set_}MMPF_adapted_2'] = pareto_all_2 / current_nb_all_2
+    metrics_dict[f'{set_}MMPF_adapted_set_2'] = pareto_set_2 / current_nb_set_2
     
     # Return the dictionnary
     return metrics_dict

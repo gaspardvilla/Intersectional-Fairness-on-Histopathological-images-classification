@@ -13,14 +13,14 @@ class Data():
         # Initialization
         super().__init__()
         self.file = f'{kwargs["task"]}_{kwargs["cancer"]}.csv'
-        self.protected_attribbutes = kwargs['protected_attributes']
+        self.protected_attributes = kwargs['protected_attributes']
         self.subgroups = kwargs['subgroups']
         self.data, self.response, self.protected_attribbutes_values, self.references = load_data(**kwargs)
         self.ratio = kwargs['split_ratio']
         self.split_validation = kwargs['split_validation']
         self.split_regarding_subgroups = kwargs['split_regarding_subgroups']
         self.nb_features = self.data[0].shape[-1]
-        self.nb_subgroups = len(np.unique(self.references[self.protected_attribbutes].values, axis = 0))
+        self.nb_subgroups = len(np.unique(self.references[self.protected_attributes].values, axis = 0))
         self.nb_workers = 16
         
         # Split the data set
@@ -39,14 +39,14 @@ class Data():
         test_subj_list = []
         
         # Get the values of unique subgroups prensent in the data set
-        unique_subgroups = np.unique(self.references[self.protected_attribbutes].values, axis = 0)
+        unique_subgroups = np.unique(self.references[self.protected_attributes].values, axis = 0)
 
         # Loop on all the unique subgroups in the references
         for subgroup in unique_subgroups:
             
             # Extract the references that are in this subgroup only
-            cond = self.references[self.protected_attribbutes[0]] == subgroup[0]
-            for idx, att in enumerate(self.protected_attribbutes[1:]):
+            cond = self.references[self.protected_attributes[0]] == subgroup[0]
+            for idx, att in enumerate(self.protected_attributes[1:]):
                 cond = cond & (self.references[att] == subgroup[idx+1])
             subjects = list(self.references[cond].subj)
             
@@ -74,13 +74,13 @@ class Data():
             # Create the data classes
             self.TrainSet = DataClass(self.data, self.response, self.references, 
                                         subjects = train_subj_list, resampling = True,
-                                        protected_attributes = self.protected_attribbutes)
+                                        protected_attributes = self.protected_attributes)
             self.ValidationSet = DataClass(self.data, self.response, self.references, 
                                             subjects = val_subj_list, resampling = False,
-                                            protected_attributes = self.protected_attribbutes)
+                                            protected_attributes = self.protected_attributes)
             self.TestSet = DataClass(self.data, self.response, self.references, 
                                         subjects = test_subj_list, resampling = False,
-                                        protected_attributes = self.protected_attribbutes)
+                                        protected_attributes = self.protected_attributes)
 
             # Loaders
             self.TrainLoader = DataLoader(self.TrainSet, batch_size = len(self.TrainSet), shuffle = True, drop_last = False)
@@ -91,10 +91,10 @@ class Data():
             # Create the data classes
             self.TrainSet = DataClass(self.data, self.response, self.references, 
                                         subjects = train_subj_list + val_subj_list, resampling = True,
-                                        protected_attributes = self.protected_attribbutes)
+                                        protected_attributes = self.protected_attributes)
             self.TestSet = DataClass(self.data, self.response, self.references, 
                                         subjects = test_subj_list, resampling = False,
-                                        protected_attributes = self.protected_attribbutes)
+                                        protected_attributes = self.protected_attributes)
 
             # Loaders
             self.TrainLoader = DataLoader(self.TrainSet, batch_size = len(self.TrainSet), shuffle = True, drop_last = False)
@@ -110,13 +110,13 @@ class Data():
             # Classes
             self.TrainSet = DataClass(self.data, self.response, self.references, 
                                       subjects = subj_list[2 * n_test :], resampling = True,
-                                      protected_attributes = self.protected_attribbutes)
+                                      protected_attributes = self.protected_attributes)
             self.ValidationSet = DataClass(self.data, self.response, self.references, 
                                            subjects = subj_list[n_test : 2 * n_test], resampling = False,
-                                           protected_attributes = self.protected_attribbutes)
+                                           protected_attributes = self.protected_attributes)
             self.TestSet = DataClass(self.data, self.response, self.references, 
                                      subjects = subj_list[: n_test], resampling = False,
-                                     protected_attributes = self.protected_attribbutes)
+                                     protected_attributes = self.protected_attributes)
             
             # Loaders
             self.TrainLoader = DataLoader(self.TrainSet, batch_size = len(self.TrainSet), shuffle = True, drop_last = False)
@@ -128,10 +128,10 @@ class Data():
             # Classes
             self.TrainSet = DataClass(self.data, self.response, self.references, 
                                       subjects = subj_list[n_test :], resampling = True,
-                                      protected_attributes = self.protected_attribbutes)
+                                      protected_attributes = self.protected_attributes)
             self.TestSet = DataClass(self.data, self.response, self.references, 
                                      subjects = subj_list[: n_test], resampling = False,
-                                     protected_attributes = self.protected_attribbutes)
+                                     protected_attributes = self.protected_attributes)
             
             # Loaders
             self.TrainLoader = DataLoader(self.TrainSet, batch_size = len(self.TrainSet), shuffle = True, drop_last = False)
