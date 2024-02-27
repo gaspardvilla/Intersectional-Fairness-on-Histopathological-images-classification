@@ -5,6 +5,35 @@ import numpy as np
 import torch
 
 
+def compute_MMPF_size(preds : torch.Tensor, 
+                      targets : torch.Tensor, 
+                      atts : torch.Tensor,
+                      mmpf_args : int,
+                      loss_fct) -> dict:
+    # Initialization
+    protected_attributes = ['age_', 'race_', 'gender_']
+    cols = protected_attributes + ['pred_raw', 'label']
+    
+    # Build the data frame so we can compute the metrics
+    df = pd.DataFrame(columns = cols)
+    for idx, pred in enumerate(preds):
+        sub_df = pd.DataFrame(data = [[atts[idx][0].item(), atts[idx][1].item(), atts[idx][2].item(), pred, targets[idx].item()]], columns = cols)
+        df = pd.concat([df, sub_df])
+    df = df.astype({'age_' : 'int32', 'race_' : 'int32', 'gender_' : 'int32', 'label' : 'int32'})
+    df.reset_index(inplace = True, drop = True)
+    
+    # Compute the loss for all the predictions
+    df['label_raw'] = list(torch.cat([1 - torch.Tensor(df.label.values).unsqueeze(0), torch.Tensor(df.label.values).unsqueeze(0)], dim = 0).T)
+    df['loss'] = df.apply(lambda row: loss_fct(torch.from_numpy(np.reshape(list(row['pred_raw']), (1, 2))), torch.from_numpy(np.reshape(list(row['label_raw']), (1, 2)))).item(), axis = 1)
+    
+    # Evaluation
+    avg_loss_df, nb_preds = _get_average_loss_subgroups(df, 'all_', protected_attributes)
+    MMPF_metrics = _compute_pareto_metrics(avg_loss_df, 'all_', mmpf_args['N'], nb_preds, mmpf_args['N_subgroups'])
+    
+    # Return the wanted metric 
+    return MMPF_metrics['MMPF_size_2']
+
+
 def compute_pareto_metrics(pred : pd.DataFrame, 
                            loss_fct,
                            protected_attributes : list,

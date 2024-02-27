@@ -7,12 +7,15 @@ from models.Baseline import Baseline
 from models.Martinez import Martinez
 from models.Foulds import Foulds
 from models.Diana import Diana
+import torch
 
 
 def init(**kwargs):
     
     # Load the data
     data = Data(**kwargs)
+    kwargs['MMPF_args'] = {'N' : len(data.response), 
+                           'N_subgroups' : len(torch.unique(data.protected_attribbutes_values, dim = 0))}
     print(data)
     
     # Initialization of the model
@@ -57,7 +60,8 @@ def init(**kwargs):
                                                               nb_STEPS = kwargs['NB_STEPS'])
     else: trainer = TrainerPL(max_epochs = kwargs['nb_epochs'],
                               check_val_every_n_epoch = kwargs['check_val'],
-                              logger = wandb)
+                              logger = wandb, 
+                              ckpt_path = kwargs['ckpt_path'])
         
     # Return
     return data, model, wandb, trainer

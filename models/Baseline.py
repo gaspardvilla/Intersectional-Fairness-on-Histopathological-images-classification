@@ -1,3 +1,4 @@
+from helpers.pareto_fairness import compute_MMPF_size
 from models.Layers import MLP, MILAttention
 from torch.autograd import Variable
 import torchmetrics as tm
@@ -14,6 +15,7 @@ class Baseline(L.LightningModule):
         self.nb_classes = kwargs['nb_classes']
         self.dropout = kwargs['dropout']
         self.loss_fct = nn.CrossEntropyLoss()
+        self.mmpf_args = kwargs['MMPF_args']
         
         # Tracking lists
         # Validation
@@ -124,11 +126,13 @@ class Baseline(L.LightningModule):
         targets_1D = torch.argmax(targets, dim = 1)
                 
         # Compute the metrics and return them
-        metrics = {f'{task}/Accuracy' : tm.Accuracy(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
-                #    f'{task}/F1-score' : tm.F1Score(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
-                #    f'{task}/Precision' : tm.Precision(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
-                #    f'{task}/Recall' : tm.Recall(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
-                   f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
+        if task == 'train':
+            metrics = {f'{task}/Accuracy' : tm.Accuracy(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
+                       f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
+        else:
+            metrics = {f'{task}/Accuracy' : tm.Accuracy(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
+                       f'{task}/MMPF_size' : compute_MMPF_size(preds, targets_1D, atts, self.mmpf_args, self.loss_fct),
+                       f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
         return metrics
     
     

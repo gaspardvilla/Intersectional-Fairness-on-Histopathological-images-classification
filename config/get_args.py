@@ -32,7 +32,7 @@ def get_args(args : argparse.Namespace = None):
     # Training
     parser.add_argument('--nb_epochs', help = 'Maximum nb of epochs', default = 500, type = int)
     parser.add_argument('--dropout', help = 'dropout', default = 0.5, type = float)
-    parser.add_argument('--check_val', help = 'Check validation every n epochs', default = 500, type = int)
+    parser.add_argument('--check_val', help = 'Check validation every n epochs', default = 10, type = int)
     parser.add_argument('--split_validation', help = 'Indicates if we give a validation set during the split', default = 1, type = int)
     parser.add_argument('--split_regarding_subgroups', help = 'Split the train/val/test sets by keeping all subgroups rationnaly present in all sets', default = 1, type = int)
     parser.add_argument('--split_ratio', help = 'Ratio used to split the data set into train / val / test sets', default = 0.2, type = float)
