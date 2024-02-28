@@ -127,10 +127,10 @@ class Baseline(L.LightningModule):
                 
         # Compute the metrics and return them
         if task == 'train':
-            metrics = {f'{task}/Accuracy' : tm.Accuracy(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
+            metrics = {f'{task}/Accuracy' : tm.classification.BinaryAccuracy()(preds_1D, targets_1D),
                        f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
         else:
-            metrics = {f'{task}/Accuracy' : tm.Accuracy(task = 'multiclass', num_classes = self.nb_classes)(preds_1D, targets_1D),
+            metrics = {f'{task}/Accuracy' : tm.classification.BinaryAccuracy()(preds_1D, targets_1D),
                        f'{task}/MMPF_size' : compute_MMPF_size(preds, targets_1D, atts, self.mmpf_args, self.loss_fct),
                        f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
         return metrics

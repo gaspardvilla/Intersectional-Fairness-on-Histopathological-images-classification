@@ -21,7 +21,7 @@ class Data():
         self.split_regarding_subgroups = kwargs['split_regarding_subgroups']
         self.nb_features = self.data[0].shape[-1]
         self.nb_subgroups = len(np.unique(self.references[self.protected_attributes].values, axis = 0))
-        self.nb_workers = 16
+        self.nb_workers = 8
         
         # Split the data set
         self.split()

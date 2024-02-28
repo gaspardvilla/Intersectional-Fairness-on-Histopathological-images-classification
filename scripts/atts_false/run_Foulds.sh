@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -c 4                               # Request one core
+#SBATCH -c 8                               # Request one core
 #SBATCH -t 4:00:00                         # Runtime in D-HH:MM format
 #SBATCH -p short                           # Partition to run in
 #SBATCH --mem=32G                          # Memory total in MiB (for all cores)
 #SBATCH -o ./logs/terminal/fairness_%j.log
 #SBATCH -e ./logs/terminal/fairness_%j.log
-#SBATCH --array=0-269
+#SBATCH --array=170-269
 
 # Activation of the env and get the cancer_id
 source activate pdm

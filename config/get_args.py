@@ -67,7 +67,7 @@ def _clear_args(args):
                           GENDERS['class']]
     
     # Initialization of the path of the run
-    args.run_path = f'run_{args.ID}/custom_subgroups_{int(args.custom_subgroups)}/{args.model}/{args.task}/{args.cancer}{args.run_path}'
+    args.run_path = f'run_{args.ID}/add_protected_atts_{int(args.add_protected_attributes)}/{args.model}/{args.task}/{args.cancer}{args.run_path}'
     return args
 
 
