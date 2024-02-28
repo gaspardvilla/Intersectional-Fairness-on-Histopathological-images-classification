@@ -17,14 +17,15 @@ def build_scenario(data_df : pd.DataFrame, seed : int):
     seed_everything(seed)
     df_f = data_df.copy()
     df_u = data_df.copy()
-    acc_pos = 0.9
-    acc_neg = 0.5
-    sigma = 0.1
+    acc_pos_f = 0.7
+    acc_pos_u = 0.82
+    acc_neg = 0.58
+    sigma = 0.05
     
     
     # Fair scenario
     # Create 6x6 fair preds ratio
-    fair_ratio = np.random.normal(acc_pos, sigma, 36).reshape((6, 6))
+    fair_ratio = np.random.normal(acc_pos_f, sigma, 36).reshape((6, 6))
     fair_ratio[fair_ratio >= 1] = 0.99
     for att_1 in range_atts[0]:
         for att_2 in range_atts[1]:
@@ -58,7 +59,7 @@ def build_scenario(data_df : pd.DataFrame, seed : int):
             
     # Unfair scenario
     # Create 6x6 unfair preds ratio
-    unfair_ratio1 = np.random.normal(acc_pos, sigma, 18)
+    unfair_ratio1 = np.random.normal(acc_pos_u, sigma, 18)
     unfair_ratio2 = np.random.normal(acc_neg, sigma, 18)
     unfair_ratio1[unfair_ratio1 >= 1] = 0.99
     unfair_ratio2[unfair_ratio2 >= 1] = 0.99
@@ -185,8 +186,8 @@ if __name__ == '__main__':
                 'MMPF_5' : 0, 'MMPF_10' : 0,
                 'MMPF_size' : 0, 'MMPF_size_2' : 0,
                 'MMPF_adapted' : 0, 'MMPF_adapted_2' : 0}
-    n_scenario = 10000
-    n_splits = 100
+    n_scenario = 1000
+    n_splits = 1000
     n = 0
 
     # Get multiple seeds
@@ -220,6 +221,6 @@ if __name__ == '__main__':
                 print(m, ' ', nb_success[m]/n)
                 
         # Save dict
-        with open('success.pkl', 'wb') as fp:
+        with open(f'success_{n_scenario}_{n_splits}.pkl', 'wb') as fp:
             pickle.dump(nb_success, fp)
             print('dictionary saved successfully to file')
