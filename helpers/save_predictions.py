@@ -12,10 +12,12 @@ import os
 def save_predictions(args : argparse.Namespace, 
                      data : Data, 
                      model : L.LightningModule,
-                     wandb : WandbLogger =  None) -> None:
+                     wandb : WandbLogger =  None, 
+                     manual_ckpt : str = None) -> None:
     
     # Get the trained model
-    ckpts = torch.load(args.ckpt_path)
+    if manual_ckpt is None : ckpts = torch.load(args.ckpt_path)
+    else: ckpts = torch.load(manual_ckpt) 
     model.load_state_dict(ckpts['state_dict'])
     model.eval()
 
@@ -41,7 +43,8 @@ def save_predictions(args : argparse.Namespace,
     # Save the dataframe with the predictions
     preds_path = f'results/preds/{args.run_path}'
     if not os.path.exists(preds_path): os.makedirs(preds_path)
-    preds_df.to_pickle(f'{preds_path}/results.pkl')
+    if manual_ckpt is not None: preds_df.to_pickle(f'{preds_path}/best_results.pkl')
+    else: preds_df.to_pickle(f'{preds_path}/results.pkl')
     
     # Extract the Pareto fairness metrics
     pareto_fairness_dict = compute_pareto_metrics(preds_df, model.loss_fct, protected_attributes = args.protected_attributes)

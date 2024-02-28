@@ -32,4 +32,4 @@ if __name__ == '__main__':
     trainer.test(model, data.TestLoader)
     
     # Save full predictions
-    if args.save_preds: save_predictions(args, data, model, wandb)
+    if args.save_preds: save_predictions(args, data, model, wandb = wandb)
