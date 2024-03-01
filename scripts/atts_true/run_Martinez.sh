@@ -5,7 +5,7 @@
 #SBATCH --mem=32G                          # Memory total in MiB (for all cores)
 #SBATCH -o ./logs/terminal/fairness_%j.log
 #SBATCH -e ./logs/terminal/fairness_%j.log
-#SBATCH --array=0-17
+#SBATCH --array=1
 
 # Activation of the env and get the cancer_id
 source activate pdm
@@ -14,7 +14,7 @@ JOB_ID=$((SLURM_ARRAY_TASK_ID))
 # Main process
 python pipeline.py  --allow_wandb 1 \
                     --job_id ${JOB_ID} \
-                    --ID 100 \
+                    --ID 102 \
                     \
                     --custom_subgroups 0 \
                     --add_protected_attributes 1 \

@@ -43,7 +43,9 @@ def save_predictions(args : argparse.Namespace,
     # Save the dataframe with the predictions
     preds_path = f'results/preds/{args.run_path}'
     if not os.path.exists(preds_path): os.makedirs(preds_path)
-    if manual_ckpt is not None: preds_df.to_pickle(f'{preds_path}/best_results.pkl')
+    if manual_ckpt is not None: 
+        preds_df.to_pickle(f'{preds_path}/best_results.pkl')
+        print(f'{preds_path}/best_results.pkl')
     else: preds_df.to_pickle(f'{preds_path}/results.pkl')
     
     # Extract the Pareto fairness metrics
