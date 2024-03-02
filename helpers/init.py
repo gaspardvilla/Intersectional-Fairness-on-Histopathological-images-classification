@@ -19,10 +19,10 @@ def init(**kwargs):
     print(data)
     
     # Initialization of the model
-    if kwargs['model'] == 'Baseline': model = Baseline(data.nb_features, **kwargs)
-    elif kwargs['model'] == 'Martinez': model = Martinez(data.nb_features, **kwargs)
-    elif kwargs['model'] == 'Foulds': model = Foulds(data.nb_features, **kwargs)
-    elif kwargs['model'] == 'Diana': model = Diana(data.nb_features, **kwargs)
+    if kwargs['model'] == 'Baseline': model = Baseline(data.nb_features, train_weights = data.train_weights, **kwargs)
+    elif kwargs['model'] == 'Martinez': model = Martinez(data.nb_features, train_weights = data.train_weights, **kwargs)
+    elif kwargs['model'] == 'Foulds': model = Foulds(data.nb_features, train_weights = data.train_weights, **kwargs)
+    elif kwargs['model'] == 'Diana': model = Diana(data.nb_features, train_weights = data.train_weights, **kwargs)
         
     # Reduce the configuration arguments for WandB
     config = {'job_id': kwargs['job_id'],

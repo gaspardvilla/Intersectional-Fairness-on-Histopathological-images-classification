@@ -1,7 +1,7 @@
+from torchmetrics.classification import BinaryAccuracy
 from helpers.pareto_fairness import compute_MMPF_size
 from models.Layers import MLP, MILAttention
 from torch.autograd import Variable
-import torchmetrics as tm
 import lightning as L
 import torch.nn as nn
 import torch
@@ -14,7 +14,7 @@ class Baseline(L.LightningModule):
         super().__init__()
         self.nb_classes = kwargs['nb_classes']
         self.dropout = kwargs['dropout']
-        self.loss_fct = nn.CrossEntropyLoss()
+        self.loss_fct = nn.CrossEntropyLoss(weight = kwargs['train_weights'])
         self.mmpf_args = kwargs['MMPF_args']
         
         # Tracking lists
@@ -127,11 +127,11 @@ class Baseline(L.LightningModule):
                 
         # Compute the metrics and return them
         if task == 'train':
-            metrics = {f'{task}/Accuracy' : tm.classification.BinaryAccuracy()(preds_1D, targets_1D),
+            metrics = {f'{task}/Accuracy' : BinaryAccuracy()(preds_1D, targets_1D),
                        f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
         else:
-            metrics = {f'{task}/Accuracy' : tm.classification.BinaryAccuracy()(preds_1D, targets_1D),
-                       f'{task}/MMPF_size' : compute_MMPF_size(preds, targets_1D, atts, self.mmpf_args, self.loss_fct),
+            metrics = {f'{task}/Accuracy' : BinaryAccuracy()(preds_1D, targets_1D),
+                       f'{task}/MMPF_size' : compute_MMPF_size(preds, targets, atts, self.mmpf_args),
                        f'{task}/loss' : self._compute_loss(preds, targets, atts, task)}
         return metrics
     

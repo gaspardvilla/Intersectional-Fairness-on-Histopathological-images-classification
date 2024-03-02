@@ -23,9 +23,12 @@ def save_predictions(args : argparse.Namespace,
 
     # Evaluation on the whole data set
     preds_df = data.references
-    preds_df['pred_raw'] = None
-    preds_df['pred'] = None
-    preds_df['set'] = None
+    preds_df['pred_0'] = -1.0
+    preds_df['pred_1'] = -1.0
+    preds_df['pred'] = -1.0
+    preds_df['set'] = 'None'
+    preds_df['label_0'] = 1 - preds_df.label
+    preds_df['label_1'] = preds_df.label
     for idx in range(len(preds_df)):
         
         # Get the data and its prediction
@@ -34,7 +37,8 @@ def save_predictions(args : argparse.Namespace,
             y_pred = model(X_idx)
         
         # Update the dataframe
-        preds_df.loc[idx, 'pred_raw'] = [y_pred]
+        preds_df.loc[idx, 'pred_0'] = float(y_pred[0][0])
+        preds_df.loc[idx, 'pred_1'] = float(y_pred[0][1])
         preds_df.loc[idx, 'pred'] = torch.argmax(y_pred, dim = 1)[0].item()
         if preds_df.loc[idx, 'subj'] in list(data.TrainSet.references.subj): preds_df.loc[idx, 'set'] = 'train'
         elif preds_df.loc[idx, 'subj'] in list(data.ValidationSet.references.subj): preds_df.loc[idx, 'set'] = 'val'
@@ -49,7 +53,7 @@ def save_predictions(args : argparse.Namespace,
     else: preds_df.to_pickle(f'{preds_path}/results.pkl')
     
     # Extract the Pareto fairness metrics
-    pareto_fairness_dict = compute_pareto_metrics(preds_df, model.loss_fct, protected_attributes = args.protected_attributes)
+    pareto_fairness_dict = compute_pareto_metrics(preds_df, protected_attributes = args.protected_attributes)
     if wandb is not None: wandb.log_metrics(pareto_fairness_dict)
     
     # # Extract the penalty term value

@@ -73,7 +73,7 @@ def _clear_args(args):
 
 def _multi_jobs(args):
     # In case we submit multiple jobs at the same time
-    if (args.model == 'Baseline') or (args.model == 'Diana'):
+    if (args.model == 'Baseline') or (args.model == 'Diana') or (args.model == 'Martinez'):
         comb = COMBS_BASELINE[args.job_id]
         args.task = comb[0]
         args.cancer = comb[1]
@@ -84,10 +84,4 @@ def _multi_jobs(args):
         args.lambda_ = comb[2]
         args.pt_method = comb[3]
         args.run_path = f'/lambda_{args.lambda_}/{args.pt_method}'
-    elif args.model == 'Martinez':
-        comb = COMBS_MARTINEZ[args.job_id]
-        args.task = comb[0]
-        args.cancer = comb[1]
-        args.alpha_ = comb[2]
-        args.run_path = f'/alpha_{args.alpha_}'
     return args

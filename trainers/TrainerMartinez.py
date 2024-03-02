@@ -81,6 +81,11 @@ class TrainerMartinez():
                                      check_val_every_n_epoch = self.max_epochs, 
                                      logger = self.logger,
                                      sub_trainer = True)
+        elif K == 1:
+            self.trainer = TrainerPL(max_epochs = 100, 
+                                     check_val_every_n_epoch = 100, 
+                                     logger = self.logger,
+                                     sub_trainer = True)
         else:
             self.trainer = TrainerPL(max_epochs = 100, 
                                      check_val_every_n_epoch = 100, 

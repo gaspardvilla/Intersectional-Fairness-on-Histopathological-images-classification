@@ -11,7 +11,7 @@ class Diana(Baseline):
         super().__init__(in_features, **kwargs)
         self.alpha = kwargs['alpha_']
         self.avg_loss_subgroups = None
-        self.loss_fct_elementwise = nn.CrossEntropyLoss(reduction = 'none')
+        self.loss_fct_elementwise = nn.CrossEntropyLoss(weight = kwargs['train_weights'], reduction = 'none')
       
         
     def _compute_loss(self, preds : torch.Tensor, targets : torch.Tensor, atts : torch.Tensor, task : str):

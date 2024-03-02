@@ -1,3 +1,4 @@
+from torchmetrics.classification import BinaryF1Score
 import lightning as L
 import torch.nn as nn
 import pandas as pd
@@ -8,26 +9,18 @@ import torch
 def compute_MMPF_size(preds : torch.Tensor, 
                       targets : torch.Tensor, 
                       atts : torch.Tensor,
-                      mmpf_args : int,
-                      loss_fct) -> dict:
-    # Initialization
-    protected_attributes = ['age_', 'race_', 'gender_']
-    cols = protected_attributes + ['pred_raw', 'label']
-    
+                      mmpf_args : int) -> dict:
     # Build the data frame so we can compute the metrics
-    df = pd.DataFrame(columns = cols)
-    for idx, pred in enumerate(preds):
-        sub_df = pd.DataFrame(data = [[atts[idx][0].item(), atts[idx][1].item(), atts[idx][2].item(), pred, targets[idx].item()]], columns = cols)
-        df = pd.concat([df, sub_df])
-    df = df.astype({'age_' : 'int32', 'race_' : 'int32', 'gender_' : 'int32', 'label' : 'int32'})
-    df.reset_index(inplace = True, drop = True)
-    
-    # Compute the loss for all the predictions
-    df['label_raw'] = list(torch.cat([1 - torch.Tensor(df.label.values).unsqueeze(0), torch.Tensor(df.label.values).unsqueeze(0)], dim = 0).T)
-    df['loss'] = df.apply(lambda row: loss_fct(torch.from_numpy(np.reshape(list(row['pred_raw']), (1, 2))), torch.from_numpy(np.reshape(list(row['label_raw']), (1, 2)))).item(), axis = 1)
+    df = pd.DataFrame(data = {'pred_0' : preds[:, 0],
+                              'pred_1' : preds[:, 1], 
+                              'label_0' : targets[:, 0], 
+                              'label_1' : targets[:, 1],
+                              'age_' : atts[:,0], 
+                              'race_' : atts[:,1],
+                              'gender_' : atts[:,2]})
     
     # Evaluation
-    avg_loss_df, nb_preds = _get_average_loss_subgroups(df, 'all_', protected_attributes)
+    avg_loss_df, nb_preds = _get_average_loss_subgroups(df, 'all_', ['age_', 'race_', 'gender_'])
     MMPF_metrics = _compute_pareto_metrics(avg_loss_df, 'all_', mmpf_args['N'], nb_preds, mmpf_args['N_subgroups'])
     
     # Return the wanted metric 
@@ -35,19 +28,16 @@ def compute_MMPF_size(preds : torch.Tensor,
 
 
 def compute_pareto_metrics(pred : pd.DataFrame, 
-                           loss_fct,
                            protected_attributes : list,
                            all_only : bool = False) -> dict:
     # Initialization
     preds = pred.copy()
+    preds = preds.astype({'age_' : 'int32', 'race_' : 'int32', 'gender_' : 'int32', 'pred' : 'int32', 'label' : 'int32'})
     pareto_fairness = {}
     N = len(preds)
     nb_subgroups_all = len(np.unique(preds[protected_attributes].values, axis = 0))
 
-    # Compute the loss for all the predictions
-    preds['label_raw'] = list(torch.cat([1 - torch.Tensor(preds.label.values).unsqueeze(0), torch.Tensor(preds.label.values).unsqueeze(0)], dim = 0).T)
-    preds['loss'] = preds.apply(lambda row: loss_fct(torch.from_numpy(np.reshape(list(row['pred_raw']), (1, 2))), torch.from_numpy(np.reshape(list(row['label_raw']), (1, 2)))).item(), axis = 1)
-
+    # For the test of the results and the plots
     if all_only : sets_to_evaluate = ['all_']
     else: sets_to_evaluate = ['all_', 'train_', 'val_', 'test_', 'full_test_']
 
@@ -85,9 +75,15 @@ def _get_average_loss_subgroups(preds : pd.DataFrame,
             cond = cond & (sub_preds[protected_attributes[i+1]] == avg_loss_df.iloc[idx][protected_attributes[i+1]])
         preds_subgroup = sub_preds[cond]
         
+        # Init the loss function with the current weights
+        n0 = len(preds_subgroup[preds_subgroup.label_1 == 0])
+        n1 = len(preds_subgroup[preds_subgroup.label_1 == 1])
+        if (n0 != 0) & (n1 != 0): loss_fct = nn.CrossEntropyLoss(weight = torch.Tensor([(n0 + n1) / n0, (n0 + n1) / n1]))
+        else: loss_fct = nn.CrossEntropyLoss()
+        
         # Compute the size and the average loss on the current subgroup
         avg_loss_df.loc[idx, 'size_'] = len(preds_subgroup)
-        avg_loss_df.loc[idx, 'avg_loss'] = np.sum(preds_subgroup.loss.values).item() / len(preds_subgroup)
+        avg_loss_df.loc[idx, 'avg_loss'] = loss_fct(torch.Tensor(preds_subgroup[['pred_0', 'pred_1']].values), torch.Tensor(preds_subgroup[['label_0', 'label_1']].values)).item()
     
     # Return the dataframe
     return avg_loss_df, len(sub_preds)
@@ -203,58 +199,3 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
     
     # Return the dictionnary
     return metrics_dict
-
-
-# def _compute_pareto_set(preds : pd.DataFrame, 
-#                         set_ : str, 
-#                         protected_attributes : list):
-#     # Filter the preds with the desired data set
-#     sub_preds = _select_preds(preds, set_)
-    
-#     # Initialization
-#     n_5 = max(int(0.05 * len(sub_preds)), 1)
-#     n_10 = max(int(0.1 * len(sub_preds)), 1)
-#     pareto_5 = 0
-#     pareto_10 = 0
-#     current_n_5 = 0
-#     current_n_10 = 0
-#     discriminated_subgroups = {f'{set_}5%': [], f'{set_}10%' : []}
-    
-#     # Create the dataframe that will contains all pareto fairness measures
-#     pareto_df = pd.DataFrame(data = torch.unique(torch.Tensor(sub_preds[protected_attributes].values), dim = 0),
-#                                 columns = protected_attributes)
-#     pareto_df['size'] = None
-#     pareto_df['fairness_score'] = None
-
-#     # Loop on all the different subgroups in the data set
-#     for idx in range(len(pareto_df)):
-        
-#         # Restrcict to the preds in this subgroup
-#         indices = sub_preds[protected_attributes[0]] == pareto_df.iloc[idx][protected_attributes[0]]
-#         for i in range(len(protected_attributes) - 1): 
-#             indices = indices & (sub_preds[protected_attributes[i+1]] == pareto_df.iloc[idx][protected_attributes[i+1]])
-#         sub_df = sub_preds[indices]
-        
-#         # Get the size of the subgroup and get the average loss in it
-#         pareto_df.loc[idx, 'size'] = len(sub_df)
-#         pareto_df.loc[idx, 'fairness_score'] = np.sum(sub_df.loss.values).item() / len(sub_df)
-    
-#     # Compute the pareto fairness with rate raw / 5% / 10
-#     pareto_df.sort_values(['fairness_score', 'size'], ascending = [False, False], inplace = True, ignore_index = True)
-#     pareto_df['raw_score'] = pareto_df['size'] * pareto_df.fairness_score
-#     pareto_raw = pareto_df.iloc[0]['fairness_score']
-#     idx = 0
-#     while current_n_10 < n_10:
-#         if current_n_5 < n_5:
-#             pareto_5 += pareto_df.iloc[idx]['raw_score']
-#             current_n_5 += pareto_df.iloc[idx]['size']
-#             discriminated_subgroups[f'{set_}5%'] += [list(pareto_df.iloc[idx][protected_attributes].values)]
-#         pareto_10 += pareto_df.iloc[idx]['raw_score']
-#         current_n_10 += pareto_df.iloc[idx]['size']
-#         discriminated_subgroups[f'{set_}10%'] += [list(pareto_df.iloc[idx][protected_attributes].values)]
-#         idx += 1
-#     pareto_5 = pareto_5 /current_n_5
-#     pareto_10 = pareto_10 / current_n_10
-    
-#     # Return all the pareto fairness
-#     return pareto_raw, pareto_5, pareto_10

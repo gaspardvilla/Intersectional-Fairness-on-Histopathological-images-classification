@@ -42,7 +42,8 @@ else:
                                               'luad_lusc_FS', 'luad_lusc_PM'],
                    'tumor_detection' : ['brca', 'coad', 'kich', 'kirc',
                                         'kirp', 'luad', 'lusc', 'read']}
-lambdas = [0.001, 0.005, 0.01, 0.05, 0.1]
+# lambdas = [0.001, 0.005, 0.01, 0.05, 0.1]
+lambdas = [0.01]
 pt_methods = ['DF_pos', 'DF_sum', 'DF_max']
 alphas = [0.5]
 
