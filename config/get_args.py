@@ -12,7 +12,7 @@ def get_args(args : argparse.Namespace = None):
     
     # Data
     parser.add_argument('--task', help = 'tumor_detection or cancer_classification', default = 'cancer_classification', type = str)
-    parser.add_argument('--cancer', help = 'Cancer types to be detected or classified (check data set)', default = 'luad_lusc_FS', type = str)
+    parser.add_argument('--cancer', help = 'Cancer types to be detected or classified (check data set)', default = 'kich_kirc_FS', type = str)
     parser.add_argument('--age_format', help = 'Indicates the format of the age_ protected attribute', default = 'discrete', type = str)
     parser.add_argument('--custom_subgroups', help = 'Indicates if we consider only some specific subgroups', default = 0, type = int)
     parser.add_argument('--add_protected_attributes', help = 'Add the protected attributes to the features', default = 1, type = int)

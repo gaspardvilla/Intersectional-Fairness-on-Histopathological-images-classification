@@ -30,9 +30,16 @@ def compute_MMPF_size(preds : torch.Tensor,
 def compute_pareto_metrics(pred : pd.DataFrame, 
                            protected_attributes : list,
                            all_only : bool = False) -> dict:
-    # Initialization
+    # Check the good format of the pred data frame - To handle previous results
     preds = pred.copy()
     preds = preds.astype({'age_' : 'int32', 'race_' : 'int32', 'gender_' : 'int32', 'pred' : 'int32', 'label' : 'int32'})
+    if 'pred_0' not in pred.columns.to_list():
+        preds['pred_0'] = 1 - torch.Tensor(preds.pred.values)
+        preds['pred_1'] = torch.Tensor(preds.pred.values)
+        preds['label_0'] = 1 - torch.Tensor(preds.label.values)
+        preds['label_1'] = torch.Tensor(preds.label.values)
+    
+    # Initialization
     pareto_fairness = {}
     N = len(preds)
     nb_subgroups_all = len(np.unique(preds[protected_attributes].values, axis = 0))

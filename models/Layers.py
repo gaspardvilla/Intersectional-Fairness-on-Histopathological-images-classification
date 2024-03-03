@@ -79,7 +79,7 @@ class MILAttention(nn.Module):
         
     def forward(self, x: torch.Tensor):
         bz, pz, fz = x.shape
-        x = x.view(bz*pz, fz)
+        x = x.view(bz * pz, fz)
         att_v = self.attetion_V(x)
         att_u = self.attetion_U(x)
         att = self.attetion_weights(att_u*att_v)
