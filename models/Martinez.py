@@ -12,7 +12,8 @@ class Martinez(Baseline):
         super().__init__(in_features, **kwargs)
         self.alpha = kwargs['alpha_']
         self.risk_tensor = None
-        self.loss_fct_elementwise = nn.CrossEntropyLoss(weight = kwargs['train_weights'], reduction = 'none')
+        if kwargs['weighting_loss'] : self.loss_fct_elementwise = nn.CrossEntropyLoss(weight = kwargs['train_weights'], reduction = 'none')
+        else: self.loss_fct_elementwise = nn.CrossEntropyLoss(reduction = 'none')
         self.lr = 1e-2
         self.decay = 0.25
         self.best_risk = torch.Tensor([float('inf')])

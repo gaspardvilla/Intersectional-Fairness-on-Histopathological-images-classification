@@ -24,7 +24,7 @@ def compute_MMPF_size(preds : torch.Tensor,
     MMPF_metrics = _compute_pareto_metrics(avg_loss_df, 'all_', mmpf_args['N'], nb_preds, mmpf_args['N_subgroups'])
     
     # Return the wanted metric 
-    return MMPF_metrics['MMPF_size_2']
+    return MMPF_metrics['MMPF_size_set_2']
 
 
 def compute_pareto_metrics(pred : pd.DataFrame, 
@@ -82,11 +82,12 @@ def _get_average_loss_subgroups(preds : pd.DataFrame,
             cond = cond & (sub_preds[protected_attributes[i+1]] == avg_loss_df.iloc[idx][protected_attributes[i+1]])
         preds_subgroup = sub_preds[cond]
         
-        # Init the loss function with the current weights
-        n0 = len(preds_subgroup[preds_subgroup.label_1 == 0])
-        n1 = len(preds_subgroup[preds_subgroup.label_1 == 1])
-        if (n0 != 0) & (n1 != 0): loss_fct = nn.CrossEntropyLoss(weight = torch.Tensor([(n0 + n1) / n0, (n0 + n1) / n1]))
-        else: loss_fct = nn.CrossEntropyLoss()
+        # # Init the loss function with the current weights
+        # n0 = len(preds_subgroup[preds_subgroup.label_1 == 0])
+        # n1 = len(preds_subgroup[preds_subgroup.label_1 == 1])
+        # if (n0 != 0) & (n1 != 0): loss_fct = nn.CrossEntropyLoss(weight = torch.Tensor([(n0 + n1) / n0, (n0 + n1) / n1]))
+        # else: loss_fct = nn.CrossEntropyLoss()
+        loss_fct = nn.CrossEntropyLoss()
         
         # Compute the size and the average loss on the current subgroup
         avg_loss_df.loc[idx, 'size_'] = len(preds_subgroup)

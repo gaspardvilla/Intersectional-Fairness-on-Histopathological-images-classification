@@ -8,17 +8,17 @@ from helpers.init import init
 args = get_args()
 
 
-print('################################')
-print('################################')
-args.model = 'Baseline'
-args.allow_wandb = False
-args.nb_epochs = 1
-args.check_val = 1
-args.task = 'cancer_classification'
-args.caner = 'kich_kirc_FS'
-args.NB_STEPS = 3
-print('################################')
-print('################################')
+# print('################################')
+# print('################################')
+# args.model = 'Baseline'
+# args.allow_wandb = False
+# args.nb_epochs = 1
+# args.check_val = 1
+# args.task = 'cancer_classification'
+# args.caner = 'kich_kirc_FS'
+# args.NB_STEPS = 3
+# print('################################')
+# print('################################')
 
 
 if __name__ == '__main__':

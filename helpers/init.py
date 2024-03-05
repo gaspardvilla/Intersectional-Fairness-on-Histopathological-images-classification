@@ -30,6 +30,7 @@ def init(**kwargs):
               'task': kwargs['task'],
               'cancer': kwargs['cancer'],
               'add_protected_attributes': kwargs['add_protected_attributes'],
+              'weighting_loss': kwargs['weighting_loss'],
               'pt_method': kwargs['pt_method'],
               'eps_1': kwargs['eps_1'],
               'lambda_': kwargs['lambda_'],

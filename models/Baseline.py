@@ -14,7 +14,8 @@ class Baseline(L.LightningModule):
         super().__init__()
         self.nb_classes = kwargs['nb_classes']
         self.dropout = kwargs['dropout']
-        self.loss_fct = nn.CrossEntropyLoss(weight = kwargs['train_weights'])
+        if kwargs['weighting_loss'] : self.loss_fct = nn.CrossEntropyLoss(weight = kwargs['train_weights'])
+        else : self.loss_fct = nn.CrossEntropyLoss()
         self.mmpf_args = kwargs['MMPF_args']
         
         # Tracking lists

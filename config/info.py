@@ -1,7 +1,7 @@
 # All categories we have in the data set for genders and races
 GENDERS = {'str' : ['FEMALE', 'MALE'],
            'class' : [0, 1]}
-RACES = {'str' : ['AMERICAN INDIAN', 'WHITE', 'ASIAN', 'BLACK'],
+RACES = {'str' : ['AMERICAN INDIAN OR ALASKA NATIVE', 'WHITE', 'ASIAN', 'BLACK OR AFRICAN AMERICAN'],
          'class' : [0, 1, 2, 3]}
 AGES = {'str' : list(map(str, range(10))),
         'class' : list(range(10))}
@@ -44,7 +44,7 @@ else:
                                         'kirp', 'luad', 'lusc', 'read']}
 # lambdas = [0.001, 0.005, 0.01, 0.05, 0.1]
 lambdas = [0.01]
-pt_methods = ['DF_pos', 'DF_sum', 'DF_max']
+pt_methods = ['DF_pos']#, 'DF_sum', 'DF_max']
 alphas = [0.5]
 
 # All the combinations for the run of the Foulds method

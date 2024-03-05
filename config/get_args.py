@@ -30,6 +30,7 @@ def get_args(args : argparse.Namespace = None):
     parser.add_argument('--alpha_', help = 'alpha value for Martinez method', default = 0.5, type = float)
 
     # Training
+    parser.add_argument('--weighting_loss', help = 'Add the weights of the distribution of the data in the loss function', default = 1, type = int)
     parser.add_argument('--nb_epochs', help = 'Maximum nb of epochs', default = 500, type = int)
     parser.add_argument('--dropout', help = 'dropout', default = 0.5, type = float)
     parser.add_argument('--check_val', help = 'Check validation every n epochs', default = 10, type = int)
