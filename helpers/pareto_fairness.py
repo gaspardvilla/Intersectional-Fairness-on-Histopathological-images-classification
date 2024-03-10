@@ -126,6 +126,7 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
     # Extract the metric 'pareto_minimum_size' - Maximum average loss on the subgroups of size at least larger than (1/nb_subgroups) * nb_preds
     nb_all = max(min(int(N / (2 * nb_subgroups_all)), avg_loss_df['size_'].max()), 1)
     nb_set = max(min(int(nb_preds / (2 * len(avg_loss_df))), avg_loss_df['size_'].max()), 1)
+    # print(set_, ' ', nb_set, ' ', nb_all, ' ', avg_loss_df.size_.sum())
     nb_all_2 = max(min(int(N / (nb_subgroups_all)), avg_loss_df['size_'].max()), 1)
     nb_set_2 = max(min(int(nb_preds / (len(avg_loss_df))), avg_loss_df['size_'].max()), 1)
     metrics_dict[f'{set_}MMPF_size'] = avg_loss_df[avg_loss_df.size_ >= nb_all].iloc[0]['avg_loss']
@@ -207,3 +208,19 @@ def _compute_pareto_metrics(avg_loss_df : pd.DataFrame,
     
     # Return the dictionnary
     return metrics_dict
+
+
+
+if __name__ == '__main__':
+    task = 'cancer_classification'
+    cancer = 'kich_kirp_FS'
+    
+    # Initialization
+    sub_dict = {'task' : [task], 'cancer' : [cancer]}
+    
+    # Extract the results pkl files
+    preds_path = f'results/preds/run_{1000}/add_protected_atts_0/Baseline'
+    results = pd.read_pickle(preds_path + f'/{task}/{cancer}/best_results.pkl')
+    
+    # MMPF_size
+    mmpf_metrics = compute_pareto_metrics(results, ['age_', 'race_', 'gender_'])

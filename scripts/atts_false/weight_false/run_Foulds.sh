@@ -5,7 +5,7 @@
 #SBATCH --mem=32G                          # Memory total in MiB (for all cores)
 #SBATCH -o ./logs/terminal/fairness_%j.log
 #SBATCH -e ./logs/terminal/fairness_%j.log
-#SBATCH --array=2-9
+#SBATCH --array=9
 
 # Activation of the env and get the cancer_id
 source activate pdm
