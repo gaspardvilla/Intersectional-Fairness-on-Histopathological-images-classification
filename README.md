@@ -8,7 +8,7 @@ This repository contains all the code used to make all the experiments presented
 ***
 ## Code architeture
 
-`pipeline.py` : Code used to train and test a specific model on a specific task given the inputs given in the scripts files.
+`pipeline.py` : Code used to train and test a specific model on a specific task given the inputs given in the scripts files. \
 `scripts/` : Folder containing all the scripts used to train all the methods on all the different classification tasks studied in the scope of the report.
 
 #### Method classes
