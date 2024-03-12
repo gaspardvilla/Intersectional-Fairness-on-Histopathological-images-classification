@@ -22,26 +22,14 @@ METRICS = ['ACC', 'F1-score', 'TP', 'TN', 'FP', 'FN',
         
         
 # All possible runs parameters
-if False:
-    tasks = ['tumor_detection']#['cancer_classification', 'tumor_detection']
-    cancer_dict = {'cancer_classification' : [#'coad_read_FS', 'coad_read_PM', 
-                                            'kich_kirc_FS', #'kich_kirc_PM',
-                                            'kich_kirp_PM', #'kich_kirp_FS', 'kich_kirp_PM',
-                                            'kirc_kirp_FS', 'kirc_kirp_PM'],
-                                            #'luad_lusc_FS', 'luad_lusc_PM'],
-                # 'tumor_detection' : ['brca', 'coad', 'kich', 'kirc',
-                #                         'kirp', 'luad', 'lusc', 'read'],
-                # 'tumor_detection' : ['brca', 'luad', 'kirc', 'coad', 'lusc']
-                'tumor_detection' : ['kirc']}
-else:
-    tasks = ['cancer_classification', 'tumor_detection']
-    cancer_dict = {'cancer_classification' : ['coad_read_FS', 'coad_read_PM', 
-                                              'kich_kirc_FS', 'kich_kirc_PM',
-                                              'kich_kirp_FS', 'kich_kirp_PM',
-                                              'kirc_kirp_FS', 'kirc_kirp_PM',
-                                              'luad_lusc_FS', 'luad_lusc_PM'],
-                   'tumor_detection' : ['brca', 'coad', 'kich', 'kirc',
-                                        'kirp', 'luad', 'lusc', 'read']}
+tasks = ['cancer_classification', 'tumor_detection']
+cancer_dict = {'cancer_classification' : ['coad_read_FS', 'coad_read_PM', 
+                                            'kich_kirc_FS', 'kich_kirc_PM',
+                                            'kich_kirp_FS', 'kich_kirp_PM',
+                                            'kirc_kirp_FS', 'kirc_kirp_PM',
+                                            'luad_lusc_FS', 'luad_lusc_PM'],
+                'tumor_detection' : ['brca', 'coad', 'kich', 'kirc',
+                                    'kirp', 'luad', 'lusc', 'read']}
 # lambdas = [0.001, 0.005, 0.01, 0.05, 0.1]
 lambdas = [0.01]
 pt_methods = ['DF_pos']#, 'DF_sum', 'DF_max']
